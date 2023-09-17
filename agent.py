@@ -17,7 +17,7 @@ class QNetwork(nn.Module):
 
 
 class Player:
-    def __init__(self, role: int, exploration_rate: float = 1.0, learning_rate: float = 0.01):
+    def __init__(self, role: int, exploration_rate: float = 1.0, learning_rate: float = 1e-4):
         self.q_network = QNetwork()
         self.optimizer = torch.optim.Adam(self.q_network.parameters(), lr=learning_rate)
         self.criterion = criterion = nn.MSELoss()
@@ -26,10 +26,10 @@ class Player:
         self.state = None
         self.last_action = None
 
-    def update_exploration_rate(self, decay_factor: float, min_exploration_rate: float = 0.05):
+    def update_exploration_rate(self, decay_factor: float, min_exploration_rate: float = 0.01):
         self.exploration_rate = max(self.exploration_rate * decay_factor, min_exploration_rate)
 
-    def train(self, next_state: [int], reward: int, gamma: float = 0.99):
+    def train(self, next_state: [int], reward: int, gamma: float = 0.99, exploration_rate_decay: float = 0.995):
         state_tensor = torch.FloatTensor(self.state)
         next_state_tensor = torch.FloatTensor(next_state)
 
@@ -45,6 +45,8 @@ class Player:
 
         self.optimizer.step()
         self.state = next_state
+        if reward == 1:
+            self.update_exploration_rate(exploration_rate_decay)
 
     def make_move(self, state: [int], available_moves: [int], epsilon: float) -> int:
         self.state = state

@@ -47,7 +47,7 @@ class Board:
             return 0
         elif self.winner == role:
             return 1
-        return 0
+        return -1
 
     def make_move(self, pos: int) -> GameStatus:
         if pos not in self.available_moves():
